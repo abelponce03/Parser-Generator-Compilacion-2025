@@ -234,6 +234,121 @@ void testHulkGrammar() {
     std::cout << std::endl;
 }
 
+void testIntermediateHulkGrammar() {
+    std::cout << "=== Test: Intermediate HULK Grammar Creation ===" << std::endl;
+    
+    // Crear la gramática intermedia
+    Grammar intermediateGrammar = ParserFactory::createIntermediateHulkGrammar();
+    std::cout << "Intermediate HULK Grammar Productions:" << std::endl;
+    intermediateGrammar.printGrammar();
+    std::cout << std::endl;
+    
+    // Verificar si es LL(1)
+    bool isLL1 = intermediateGrammar.isLL1();
+    std::cout << "Intermediate Grammar is LL(1): " << (isLL1 ? "YES" : "NO") << std::endl;
+    
+    if (isLL1) {
+        // Mostrar algunos conjuntos FIRST y FOLLOW para debug
+        std::cout << "=== DEBUG: FIRST and FOLLOW sets for intermediate grammar ===" << std::endl;
+        intermediateGrammar.printFirstSets();
+        intermediateGrammar.printFollowSets();
+        std::cout << "=== END DEBUG ===" << std::endl;
+        
+        // Crear parser con gramática intermedia
+        auto parser = ParserFactory::createIntermediateHulkParser();
+        
+        // Test expressions with equality comparisons
+        std::vector<std::string> testInputs = {
+            "123;",
+            "x;",
+            "true;",
+            "false;",
+            "1 + 2;",
+            "3 * 4;",
+            "\"hello\";",
+            "(1 + 2) * 3;",
+            "1 == 2;",
+            "3 != 4;",
+            "1 + 2 == 3;",
+            "x == \"world\";",
+            "true != false;"
+        };
+        
+        for (const auto& input : testInputs) {
+            std::cout << "Testing input: \"" << input << "\"" << std::endl;
+            
+            try {
+                auto result = parser->parse(input);
+                if (result) {
+                    std::cout << "✓ Parsed successfully - created AST with " 
+                              << result->stmts.size() << " statements" << std::endl;
+                } else {
+                    std::cout << "✗ Parsing failed - null result" << std::endl;
+                }
+            } catch (const std::exception& e) {
+                std::cout << "✗ Parsing failed: " << e.what() << std::endl;
+            }
+            std::cout << std::endl;
+        }
+    } else {
+        std::cout << "⚠️  Intermediate grammar has LL(1) conflicts - need to refactor" << std::endl;
+    }
+    
+    std::cout << std::endl;
+}
+
+void testFullHulkGrammar() {
+    std::cout << "=== Test: Full HULK Grammar Creation ===" << std::endl;
+    
+    // Crear la gramática completa
+    Grammar fullGrammar = ParserFactory::createFullHulkGrammar();
+    std::cout << "Full HULK Grammar Productions (" << fullGrammar.getProductions().size() << " total):" << std::endl;
+    fullGrammar.printGrammar();
+    std::cout << std::endl;
+    
+    // Verificar si es LL(1)
+    bool isLL1 = fullGrammar.isLL1();
+    std::cout << "Full Grammar is LL(1): " << (isLL1 ? "YES" : "NO") << std::endl;
+    
+    if (!isLL1) {
+        std::cout << "⚠️  Full grammar has LL(1) conflicts - need to refactor" << std::endl;
+    } else {
+        std::cout << "✓ Full HULK grammar is LL(1) compatible!" << std::endl;
+        
+        // Si es LL(1), probar el parser
+        auto parser = ParserFactory::createFullHulkParser();
+        
+        // Test expresiones complejas
+        std::vector<std::string> testInputs = {
+            "123;",
+            "x + y * z;",
+            "let x := 5 in x + 1;",
+            "if (true) 1 else 0;",
+            "while (x > 0) x := x - 1;",
+            // "function add(x, y) => x + y;", // TODO: Habilitar cuando esté listo
+            // "new Point(1, 2);"
+        };
+        
+        for (const auto& input : testInputs) {
+            std::cout << "Testing full grammar with: \"" << input << "\"" << std::endl;
+            
+            try {
+                auto result = parser->parse(input);
+                if (result) {
+                    std::cout << "✓ Parsed successfully" << std::endl;
+                } else {
+                    std::cout << "✗ Parsing failed - null result" << std::endl;
+                }
+            } catch (const std::exception& e) {
+                std::cout << "✗ Parsing failed: " << e.what() << std::endl;
+            }
+            std::cout << std::endl;
+        }
+    }
+    
+    std::cout << std::endl;
+}
+
 int main() {
     std::cout << "LL(1) Parser Generator Tests" << std::endl;
     std::cout << "============================" << std::endl << std::endl;
@@ -245,6 +360,8 @@ int main() {
         testParseTable();
         testLexer();
         testHulkGrammar();
+        testIntermediateHulkGrammar();
+        testFullHulkGrammar();
         
         std::cout << "All tests passed! ✓" << std::endl;
         

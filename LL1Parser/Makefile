@@ -7,7 +7,7 @@ OBJDIR = obj
 BINDIR = bin
 
 # Archivos fuente
-SOURCES = ll1_grammar.cpp ll1_parser.cpp hulk_grammar.cpp simple_hulk_grammar.cpp test_ll1.cpp
+SOURCES = ll1_grammar.cpp ll1_parser.cpp hulk_grammar.cpp simple_hulk_grammar.cpp intermediate_hulk_grammar.cpp full_hulk_grammar.cpp test_ll1.cpp
 OBJECTS = $(SOURCES:%.cpp=$(OBJDIR)/%.o)
 
 # Ejecutable de prueba

@@ -104,6 +104,18 @@ public:
     // Crear parser simple para testing
     static std::unique_ptr<LL1Parser> createSimpleHulkParser();
     
+    // Crear gramática HULK intermedia (expandida gradualmente)
+    static Grammar createIntermediateHulkGrammar();
+    
+    // Crear parser HULK intermedio
+    static std::unique_ptr<LL1Parser> createIntermediateHulkParser();
+    
+    // Crear gramática HULK completa
+    static Grammar createFullHulkGrammar();
+    
+    // Crear parser HULK completo
+    static std::unique_ptr<LL1Parser> createFullHulkParser();
+    
 private:
     static void setupHulkSemanticActions(LL1Parser& parser);
     static void setupSimpleHulkSemanticActions(LL1Parser& parser);
