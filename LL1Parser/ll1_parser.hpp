@@ -76,6 +76,9 @@ public:
     // Configurar acciones semánticas
     void setSemanticAction(int productionId, const SemanticAction& action);
     
+    // Obtener acción semántica (para verificar si existe)
+    SemanticAction* getSemanticAction(int productionId);
+    
     // Analizar entrada
     std::unique_ptr<Program> parse(const std::string& input);
     
@@ -123,9 +126,12 @@ public:
     static std::unique_ptr<LL1Parser> createFullHulkParserV2();
     static Grammar createFullHulkGrammarV3();
     static std::unique_ptr<LL1Parser> createFullHulkParserV3();
+    static std::unique_ptr<LL1Parser> createFullHulkParserV4();
 
     // Métodos para acciones semánticas (si se usan)
     // static void setupFullHulkSemanticActions(LL1Parser& parser);
+    static void setupFullHulkSemanticActionsV3(LL1Parser& parser);
+    static void setupCompleteSemanticActionsV4(LL1Parser& parser);
     
 private:
     static void setupHulkSemanticActions(LL1Parser& parser);

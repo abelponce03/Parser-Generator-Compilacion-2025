@@ -11,7 +11,7 @@ PARSER_LIB_SOURCES = ll1_grammar.cpp ll1_parser.cpp
 PARSER_LIB_OBJECTS = $(PARSER_LIB_SOURCES:%.cpp=$(OBJDIR)/%.o)
 
 # Archivos fuente de las gramáticas
-GRAMMAR_SOURCES = simple_hulk_grammar.cpp intermediate_hulk_grammar.cpp full_hulk_grammar.cpp full_hulk_grammar_v2.cpp full_hulk_grammar_v3.cpp
+GRAMMAR_SOURCES = simple_hulk_grammar.cpp intermediate_hulk_grammar.cpp full_hulk_grammar.cpp full_hulk_grammar_v2.cpp full_hulk_grammar_v3.cpp semantic_actions_v3.cpp semantic_actions_complete.cpp semantic_actions_v4.cpp
 GRAMMAR_OBJECTS = $(GRAMMAR_SOURCES:%.cpp=$(OBJDIR)/%.o)
 
 # Ejecutables de prueba y sus dependencias específicas
@@ -21,8 +21,11 @@ TARGET_LET_SUCCESS = $(BINDIR)/test_let_success
 TARGET_OPERATORS = $(BINDIR)/test_operators
 TARGET_FULL_V2 = $(BINDIR)/test_full_v2
 TARGET_FULL_V3 = $(BINDIR)/test_full_v3
+TARGET_MAPPER = $(BINDIR)/production_mapper_simple
+TARGET_SEMANTIC_V4 = $(BINDIR)/test_semantic_v4
+TARGET_SIMPLE_SEMANTIC = $(BINDIR)/test_simple_semantic
 
-TARGETS = $(TARGET_MAIN) $(TARGET_LET) $(TARGET_LET_SUCCESS) $(TARGET_OPERATORS) $(TARGET_FULL_V2) $(TARGET_FULL_V3)
+TARGETS = $(TARGET_MAIN) $(TARGET_LET) $(TARGET_LET_SUCCESS) $(TARGET_OPERATORS) $(TARGET_FULL_V2) $(TARGET_FULL_V3) $(TARGET_MAPPER) $(TARGET_SEMANTIC_V4) $(TARGET_SIMPLE_SEMANTIC)
 
 .PHONY: all clean
 
@@ -44,7 +47,16 @@ $(TARGET_OPERATORS): $(OBJDIR)/test_operators.o $(PARSER_LIB_OBJECTS) $(OBJDIR)/
 $(TARGET_FULL_V2): $(OBJDIR)/test_full_v2.o $(PARSER_LIB_OBJECTS) $(OBJDIR)/full_hulk_grammar_v2.o $(OBJDIR)/intermediate_hulk_grammar.o
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
-$(TARGET_FULL_V3): $(OBJDIR)/test_full_v3.o $(PARSER_LIB_OBJECTS) $(OBJDIR)/full_hulk_grammar_v3.o
+$(TARGET_FULL_V3): $(OBJDIR)/test_full_v3.o $(PARSER_LIB_OBJECTS) $(OBJDIR)/full_hulk_grammar_v3.o $(OBJDIR)/semantic_actions_v3.o
+	$(CXX) $(CXXFLAGS) -o $@ $^
+
+$(TARGET_SEMANTIC_V4): $(OBJDIR)/test_semantic_v4.o $(PARSER_LIB_OBJECTS) $(OBJDIR)/full_hulk_grammar_v3.o $(OBJDIR)/semantic_actions_v4.o
+	$(CXX) $(CXXFLAGS) -o $@ $^
+
+$(TARGET_SIMPLE_SEMANTIC): $(OBJDIR)/test_simple_semantic.o $(PARSER_LIB_OBJECTS) $(OBJDIR)/full_hulk_grammar_v3.o $(OBJDIR)/semantic_actions_v4.o
+	$(CXX) $(CXXFLAGS) -o $@ $^
+
+$(TARGET_MAPPER): $(OBJDIR)/production_mapper_simple.o $(PARSER_LIB_OBJECTS)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 
@@ -75,6 +87,15 @@ test-full-v2: $(TARGET_FULL_V2)
 
 test-full-v3: $(TARGET_FULL_V3)
 	./$(TARGET_FULL_V3)
+
+test-semantic-v4: $(TARGET_SEMANTIC_V4)
+	./$(TARGET_SEMANTIC_V4)
+
+test-simple-semantic: $(TARGET_SIMPLE_SEMANTIC)
+	./$(TARGET_SIMPLE_SEMANTIC)
+
+map-productions: $(TARGET_MAPPER)
+	./$(TARGET_MAPPER)
 
 clean:
 	rm -rf $(OBJDIR) $(BINDIR)

@@ -235,6 +235,14 @@ void LL1Parser::setSemanticAction(int productionId, const SemanticAction& action
     semanticActions[productionId] = action;
 }
 
+SemanticAction* LL1Parser::getSemanticAction(int productionId) {
+    auto it = semanticActions.find(productionId);
+    if (it != semanticActions.end()) {
+        return &it->second;
+    }
+    return nullptr;
+}
+
 std::unique_ptr<Program> LL1Parser::parse(const std::string& input) {
     lexer = std::make_unique<Lexer>(input);
     advance(); // Leer primer token

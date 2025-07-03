@@ -199,7 +199,14 @@ Grammar ParserFactory::createFullHulkGrammarV3() {
 std::unique_ptr<LL1Parser> ParserFactory::createFullHulkParserV3() {
     Grammar grammar = createFullHulkGrammarV3();
     auto parser = std::make_unique<LL1Parser>(grammar);
-    // setupFullHulkSemanticActions(*parser); // TODO: Implementar cuando sea LL(1)
+    // setupFullHulkSemanticActionsV3(*parser); // Deshabilitado temporalmente
+    return parser;
+}
+
+std::unique_ptr<LL1Parser> ParserFactory::createFullHulkParserV4() {
+    Grammar grammar = createFullHulkGrammarV3();
+    auto parser = std::make_unique<LL1Parser>(grammar);
+    setupCompleteSemanticActionsV4(*parser); // Habilitar acciones semánticas V4
     return parser;
 }
 
