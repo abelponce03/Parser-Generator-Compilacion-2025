@@ -10,39 +10,8 @@ void testBasicGrammar() {
     
     Grammar grammar;
     
-         // Test expresiones intermedias - incluyendo operadores relacionales
-        std::vector<std::string> testInputs = {
-            "123;",
-            "x;",
-            "true;",
-            "false;",
-            "1 + 2;",
-            "3 * 4;",
-            "\"hello\";",
-            "(1 + 2) * 3;",
-            "1 == 2;",
-            "3 != 4;",
-            "1 + 2 == 3;",
-            "x == \"world\";",
-            "true != false;",
-            // Nuevas pruebas para operadores relacionales
-            "5 < 10;",
-            "8 > 3;",
-            "7 <= 7;",
-            "9 >= 5;",
-            "1 + 2 < 5;",
-            "x * 2 > y;",
-            "(a + b) <= (c - d);",
-            "foo >= bar * 2;",
-            // Combinación de operadores relacionales y de igualdad
-            "1 < 2 == true;",
-            "x > 5 != false;",
-            "a <= b == c >= d;",
-            // Expresiones más complejas
-            "1 + 2 * 3 > 5;",
-            "(x + y) * z < w / 2;",
-            "\"hello\" == \"world\" != true;"
-        };    Symbol E(SymbolType::NON_TERMINAL, "E");
+    // Símbolos
+    Symbol E(SymbolType::NON_TERMINAL, "E");
     Symbol T(SymbolType::NON_TERMINAL, "T");
     Symbol F(SymbolType::NON_TERMINAL, "F");
     Symbol plus(SymbolType::TERMINAL, "PLUS");

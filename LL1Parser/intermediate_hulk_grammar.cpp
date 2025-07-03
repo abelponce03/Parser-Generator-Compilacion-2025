@@ -30,7 +30,14 @@ Grammar ParserFactory::createIntermediateHulkGrammar() {
     Symbol or_expr(SymbolType::NON_TERMINAL, "or_expr");
     Symbol or_expr_prime(SymbolType::NON_TERMINAL, "or_expr_prime");
     
+    // Let expressions (nuevo)
+    Symbol let_expr(SymbolType::NON_TERMINAL, "let_expr");
+    Symbol binding_list(SymbolType::NON_TERMINAL, "binding_list");
+    Symbol binding_list_prime(SymbolType::NON_TERMINAL, "binding_list_prime");
+    Symbol binding(SymbolType::NON_TERMINAL, "binding");
+    
     // Aritmética (como gramática simple - SIN unary_expr)
+    Symbol arith_expr(SymbolType::NON_TERMINAL, "arith_expr");
     Symbol add_expr(SymbolType::NON_TERMINAL, "add_expr");
     Symbol mult_expr(SymbolType::NON_TERMINAL, "mult_expr");
     Symbol primary_expr(SymbolType::NON_TERMINAL, "primary_expr");
@@ -64,18 +71,19 @@ Grammar ParserFactory::createIntermediateHulkGrammar() {
     Symbol le(SymbolType::TERMINAL, "LE");
     Symbol ge(SymbolType::TERMINAL, "GE");
     
-    // Operadores lógicos (nuevo)
+    // Operadores lógicos
     Symbol and_op(SymbolType::TERMINAL, "AND");
     Symbol or_op(SymbolType::TERMINAL, "OR");
     
-    // Let expression keywords (por el momento comentado)
-    // Symbol let_kw(SymbolType::TERMINAL, "LET");
+    // Let expression keywords
+    Symbol let_kw(SymbolType::TERMINAL, "LET");
     Symbol in_kw(SymbolType::TERMINAL, "IN");
-    Symbol assign(SymbolType::TERMINAL, "ASSIGN");
+    Symbol assign_destruct(SymbolType::TERMINAL, "ASSIGN_DESTRUCT"); // :=
     
     Symbol lparen(SymbolType::TERMINAL, "LPAREN");
     Symbol rparen(SymbolType::TERMINAL, "RPAREN");
     Symbol semicolon(SymbolType::TERMINAL, "SEMICOLON");
+    Symbol comma(SymbolType::TERMINAL, "COMMA");
     
     // === ESTABLECER SÍMBOLO INICIAL ===
     grammar.setStartSymbol(program);
@@ -94,53 +102,45 @@ Grammar ParserFactory::createIntermediateHulkGrammar() {
     // 3. Statements
     grammar.addProduction(stmt, {expr, semicolon});
     
-    // 4. Expresiones - jerarquía de operadores lógicos y comparaciones
-    grammar.addProduction(expr, {or_expr});
+    // 4. Expresiones - simplificación para eliminar ambigüedad
+    grammar.addProduction(expr, {arith_expr});
     
-    // 5. Operadores lógicos OR (mayor precedencia que AND)
-    grammar.addProduction(or_expr, {and_expr, or_expr_prime});
-    grammar.addProduction(or_expr_prime, {or_op, and_expr, or_expr_prime});
-    grammar.addProduction(or_expr_prime, {EPSILON});
+    // 5. Expresiones aritméticas (separadas de let para evitar conflictos) - permitir let anidados
+    grammar.addProduction(arith_expr, {add_expr});
+    grammar.addProduction(arith_expr, {let_expr});
     
-    // 6. Operadores lógicos AND
-    grammar.addProduction(and_expr, {eq_expr, and_expr_prime});
-    grammar.addProduction(and_expr_prime, {and_op, eq_expr, and_expr_prime});
-    grammar.addProduction(and_expr_prime, {EPSILON});
-    
-    // 7. Comparaciones de igualdad
-    grammar.addProduction(eq_expr, {rel_expr, eq_expr_prime});
-    grammar.addProduction(eq_expr_prime, {eq, rel_expr, eq_expr_prime});
-    grammar.addProduction(eq_expr_prime, {neq, rel_expr, eq_expr_prime});
-    grammar.addProduction(eq_expr_prime, {EPSILON});
-    
-    // 8. Comparaciones relacionales
-    grammar.addProduction(rel_expr, {add_expr, rel_expr_prime});
-    grammar.addProduction(rel_expr_prime, {lt, add_expr, rel_expr_prime});
-    grammar.addProduction(rel_expr_prime, {gt, add_expr, rel_expr_prime});
-    grammar.addProduction(rel_expr_prime, {le, add_expr, rel_expr_prime});
-    grammar.addProduction(rel_expr_prime, {ge, add_expr, rel_expr_prime});
-    grammar.addProduction(rel_expr_prime, {EPSILON});
-    
-    // 9. Suma y resta 
+    // 6. Suma y resta 
     grammar.addProduction(add_expr, {mult_expr, add_expr_prime});
     grammar.addProduction(add_expr_prime, {plus, mult_expr, add_expr_prime});
     grammar.addProduction(add_expr_prime, {minus, mult_expr, add_expr_prime});
     grammar.addProduction(add_expr_prime, {EPSILON});
     
-    // 10. Multiplicación, división, módulo
+    // 7. Multiplicación, división, módulo
     grammar.addProduction(mult_expr, {primary_expr, mult_expr_prime});
     grammar.addProduction(mult_expr_prime, {mult, primary_expr, mult_expr_prime});
     grammar.addProduction(mult_expr_prime, {div, primary_expr, mult_expr_prime});
     grammar.addProduction(mult_expr_prime, {mod, primary_expr, mult_expr_prime});
     grammar.addProduction(mult_expr_prime, {EPSILON});
     
-    // 11. Expresiones primarias (SIN let por ahora - como gramática simple)
+    // 8. Expresiones primarias - SIN let para evitar recursión
     grammar.addProduction(primary_expr, {number});
     grammar.addProduction(primary_expr, {string_lit});
     grammar.addProduction(primary_expr, {true_lit});
     grammar.addProduction(primary_expr, {false_lit});
     grammar.addProduction(primary_expr, {ident});
-    grammar.addProduction(primary_expr, {lparen, expr, rparen});
+    grammar.addProduction(primary_expr, {lparen, arith_expr, rparen});
+    // grammar.addProduction(primary_expr, {let_expr}); // COMENTAR TEMPORALMENTE
+    
+    // 9. Let expressions - usando arith_expr para evitar recursión problemática
+    grammar.addProduction(let_expr, {let_kw, binding_list, in_kw, arith_expr});
+    
+    // 10. Lista de asignaciones (bindings)
+    grammar.addProduction(binding_list, {binding, binding_list_prime});
+    grammar.addProduction(binding_list_prime, {comma, binding, binding_list_prime});
+    grammar.addProduction(binding_list_prime, {EPSILON});
+    
+    // 11. Asignaciones individuales - usando arith_expr para evitar recursión
+    grammar.addProduction(binding, {ident, assign_destruct, arith_expr});
     
     return grammar;
 }
