@@ -1,5 +1,4 @@
 #include "ll1_parser.hpp"
-#include "intermediate_hulk_grammar.cpp"
 #include <iostream>
 
 using namespace LL1;
